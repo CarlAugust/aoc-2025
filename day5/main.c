@@ -28,5 +28,6 @@ int main(void) {
             } 
         }
     }
+    
     printf("There are %i fresh materials\n", fresh);
 }
