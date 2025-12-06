@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 /*
 Cannot be bothered doing this right now:
@@ -30,27 +31,43 @@ int main(void) {
 
     for (int i = 0; i < H; i++) {
         scanf("%s\n", map[i]);
+        memcpy(mapTemp[i], map[i], W + 1);
     }
-    
-    int count = 0;
-    for (int y = 0; y < H; y++) {
-        for (int x = 0; x < W; x++) {
-            if (map[y][x] != '@') continue;
-            int rolls = -1;
-            // i for y and j for x
-            for (int i = y - 1; i < y + 2; i++) {
-                for (int j = x - 1; j < x + 2; j++) {
-                    if (!boundCheck(i, j, W, H)) continue;
-                    if (map[i][j] == '@') rolls++;
+
+    int sum = 0;
+    while(true) {
+        int tempsum = sum;
+        int count = 0;
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                if (map[y][x] != '@') continue;
+                int rolls = -1;
+                // i for y and j for x
+                for (int i = y - 1; i < y + 2; i++) {
+                    for (int j = x - 1; j < x + 2; j++) {
+                        if (!boundCheck(i, j, W, H)) continue;
+                        if (map[i][j] == '@') rolls++;
+                    }
+                }
+
+                if (rolls < 4) {
+                    count++; 
+                    mapTemp[y][x] = '.';
                 }
             }
+        }
 
-            if (rolls < 4) {
-                count++; 
-            }
+        sum+=count;
+        if (sum == tempsum) {
+            break;
+        }
+
+        for (int i = 0; i < H; i++) {
+            memcpy(map[i], mapTemp[i], W + 1);
         }
     }
-    printf("Count: %i\n", count);
+    
+    printf("Sum: %i\n", sum);
     return 0;
 
 }
