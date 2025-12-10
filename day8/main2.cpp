@@ -52,8 +52,23 @@ vector<ijd> PointsDistance(vector<v3> v) {
     return dv;
 }
 
-bool AlreadyConnected(vector<vector<int>> &adj, int i, int j) {
-    return (find(adj[i].begin(), adj[i].end(), j) != adj[i].end());
+bool AlreadyConnected(vector<vector<int>> &adj, int i, int j) { 
+    vector<int> stack = {i};
+    vector<bool> visited(N, false);
+
+    visited[i] = true;
+    while (!stack.empty()) {
+        auto a = stack.back();
+        stack.pop_back();
+        for (auto b : adj[a]) {
+            if (b == j) return true;
+            if (!visited[b]) {
+                visited[b] = true;
+                stack.push_back(b);
+            }
+        }
+    }
+    return false;
 }
 
 int main() {
@@ -64,12 +79,10 @@ int main() {
     vector<vector<int>> adj(N);
     vector<bool> v(N);
 
-    for (int i = 0; i < 10; i++) {
-        cout << distances[i].d << endl;
-    }
     int conn = 0;
+    ijd prevd; 
     for (auto d : distances) {
-        if (!(conn < 999)) break;
+        if (!(conn < (N - 1))) break;
         if (d.d == 0) continue; // same points
         if (AlreadyConnected(adj, d.i, d.j)) continue;
         conn++;
@@ -77,41 +90,9 @@ int main() {
         adj[d.j].push_back(d.i);
         v[d.i] = true;
         v[d.j] = true;
+        prevd = d;
     }
 
-
-    vector<bool> visited(N, false);
-    vector<int> counts;
-    for (int i = 0; i < N; i++) {
-        if (visited[i]) continue;
-
-        vector<int> stack = {i};
-        visited[i] = true;
-        int count = 1;
-        while (!stack.empty()) {
-            auto a = stack.back();
-            stack.pop_back();
-            for (auto b : adj[a]) {
-                if (!visited[b]) {
-                    visited[b] = true;
-                    stack.push_back(b);
-                    count++;
-                }
-            }
-        }
-        counts.push_back(count);
-    }
-
-    sort(counts.begin(), counts.end());
-
-    for (auto i : counts) {
-        cout << i << endl;
-    }
-
-    long sum = 1;
-    for (int i = 0; i < 3; i++) {
-        sum *= counts[counts.size() - 1 - i];
-    }
-    cout << sum << endl;
+    cout << (long)(points[prevd.i].x) * (long)(points[prevd.j].x) << endl;
     return 0;
 }
