@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <vector>
+#include <assert.h>
 #include <stdint.h>
 #include <algorithm>
 
@@ -12,35 +13,83 @@ typedef struct {
 
 
 /*
-    Theoretical solution for part 2
 
-    Basics is to check if current rect goes past a border point
-    aka if rectangle 2,3 to 4,5 crosses 3,3 its not inside of the grids
+    I: No other point is inside of the area
+    II: All corners are valid
+    
+    I:  X## ##X Here the top most left corner with the right bottom would not be valid 
+        X#X#X#X
 
-    some edge cases: points inside of a border created by other 4 points?
-    it is not garunteed that it creates a perfect house shape?
+    I:  X##X Here the top most left corner with the right bottom would not be valid
+        ###X
+        X##X
+           X
 
-    Though the problem description seems to indicate that all points are on 
-    given such that it can create a perfect house shape with no internal points.
-
-    So we will first try to use the if no other points inside of rectangle then the area is valid theory.
-    Though does that mean O(n3) is enforced? Is there a less brute force algorithm?
-    Because we will have to loop through all pairs of points for rectangles and all points to check if there is
-    an point inside of it.
+    
 
 */
 
+bool InsideTwoPointRectangle(v2 v01, v2 v02, v2 u) {
+    // which points is first?
+
+    long maxx = v01.x > v02.x ? v01.x : v02.x;
+    long maxy = v01.y > v02.y ? v01.y : v02.y;
+    long minx = v01.x < v02.x ? v01.x : v02.x;
+    long miny = v01.y < v02.y ? v01.y : v02.y;
+
+    return u.x > minx && u.x < maxx && u.y > miny && u.y < maxy;
+}
+
+long Area(v2 u, v2 v) {
+    return (abs(u.x - v.x) + 1) * (abs(u.y - v.y) + 1);
+}
+
+void printv2(v2 v) {
+    printf("x: %li, y: %li\n", v.x, v.y);
+}
+
 using namespace std;
 int main() {
-    vector<v2> vs;
-    v2 v;
-    long m = -1;
-    while (scanf("%li,%li\n", &v.x, &v.y) == 2) {
-        for (auto u : vs) {
-            m = max((abs(u.x - v.x) + 1) * (abs(u.y - v.y) + 1), m);
-        } 
-        vs.push_back(v);
+    vector<v2> v;
+    v2 v1;
+
+    v2 v2; // For vertical or horizontal proof
+    bool step = false;
+    while (scanf("%li,%li\n", &v1.x, &v1.y) == 2) {
+
+        // Proving that next points is always horizontal or vertical thus we can use inside rectangle algorithm
+        if (step) assert(v1.x == v2.x || v2.y == v2.y);
+        step = true;
+        v2 = v1;
+        // --------- >
+
+        v.push_back(v1);
     }
 
-    printf("%li\n", m);
+    long m = -1;
+    for (int i = 0; i < v.size() - 1; i++) {
+        for (int j = i + 1; j < v.size(); j++) {
+
+            bool valid = true;
+
+            for (int k = 0; k < v.size(); k++) {
+                if (InsideTwoPointRectangle(v[i], v[j], v[k])) {
+                    valid = false;
+                    break;
+                }
+
+            }
+            if (valid) {
+                m = max(Area(v[i], v[j]), m);
+                printf("%li\n", m);
+                printv2(v[i]);
+                printv2(v[j]);
+                printf("\n");
+            }
+        }
+    }
+
+    printf("Max: %li\n", m);
+
+    return 0;
 }
